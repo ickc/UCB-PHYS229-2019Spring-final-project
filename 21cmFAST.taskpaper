@@ -1,0 +1,59 @@
+Inbox:
+	- running 21cmFAST z=1-30 on lpc
+		running out of memeory when using `reio_bins_tanh`
+		trying `reio_inter`
+	- running class with x_e from z=6-30 on cori01
+	- try in class to ask for x_e??
+description:
+	For your P229 final project I would like you to run the 21cmfast code (https://github.com/andreimesinger/21cmFAST) varying several of its parameters to produce ionization histories.
+	Then use CAMB or CLASS (preferred) to compute how the temperature and polarization angular power spectra of the CMB would change if the Universe reionized in this manner.
+	You can either submit an iPython notebook or a PDF file describing your results.
+Notes:
+	Parameter_files/:
+		control cosmology parameters
+	Programs/PROGRAM_LIST:
+		driver programs or individually?
+		init once for each realization
+		drive_logZscroll_Ts:
+			example in Out-of-box_Output/
+Glue:
+	external_Pk from class?
+		see example programs in external_Pk/
+		seems like can only be used in command line program `class ...ini`?
+	x_e?
+		search `(x_e|xe)` in `explanatory.ini`
+	`drive_zscroll_reion_param.c`?
+		deleted in commit c8146c with modifies `find_HII_bubbles.c`
+			https://github.com/andreimesinger/21cmFAST/commit/c8146c2bdf0a79d02da90d7bc3d2f2f9917cf839#diff-87ed9cdd4c6ad2ca64fd25ad7620f257
+	global_evolution_Nsteps40_zprimestepfactor1.020_L_X3.2e+40_alphaX1.0_f_star100.0500_alpha_star0.5000_f_esc100.1000_alpha_esc-0.5000_Mturn5.0e+08_t_star0.5000_Pop2_200_300Mpc?
+		output after running `drive_logZscroll_Ts`
+		see line 964 of `Ts.c`: the 10 columns seems to be
+		zp, filling_factor_of_HI_zp, Tk_ave, x_e_ave, Ts_ave, T_cmb*(1+zp), J_alpha_ave, xalpha_ave, Xheat_ave, Xion_ave
+		
+Questions:
+	figure out what default parameters it use. @done
+		base_2018_plikHM_TTTEEE_lowl_lowE_lensing.ini? @done
+		explanatory.ini? @done
+21cmFAST config:
+	see 21cmFAST 2018 paper p.5 Table 1
+	compare to 
+		`ANAL_PARAMS.H` line 32-36, 53
+		`HEAT_PARAMS.H:24
+	z-range defined in `drive_logZscroll_Ts` line 16-17
+	- STELLAR_BARYON_FRAC
+	- STELLAR_BARYON_PL
+	- ESC_FRAC
+	- ESC_PL
+	- M_TURNOVER
+	- L_X
+Parameter_files/INIT_PARAMS.H:
+	#define NUMCORES (int) 10 // # of cores you wish to allocate (must be shared mem)                                                                            
+	#define RAM (float) 63 // physical memory in GB available
+
+Parameter spaces:
+	- 21cmfast_param_gen.ipynb
+		generates the .H parameter files
+	- symlink.sh
+		create symlinks for all other files
+	- makefile
+		make drive_logZscroll_Ts
