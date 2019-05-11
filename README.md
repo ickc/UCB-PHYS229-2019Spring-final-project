@@ -6,6 +6,8 @@ Final project of PHYS 229 at UCB in Spring 2019:
 > Then use CAMB or CLASS (preferred) to compute how the temperature and polarization angular power spectra of the CMB would change if the Universe reionized in this manner.
 > You can either submit an iPython notebook or a PDF file describing your results.
 
+[See report here](report.html).
+
 # Organization
 
 `21cmFAST.taskpaper`
