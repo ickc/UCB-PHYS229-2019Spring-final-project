@@ -9,7 +9,7 @@ author: Kolen Cheung
 
 The code used in this report, including the generation and hosting of this document, is available on [GitHub here](https://github.com/ickc/UCB-PHYS229-2019Spring-final-project). The data generated in this study is available on [GitHub Releases here](https://github.com/ickc/UCB-PHYS229-2019Spring-final-project/releases).
 
-The canonical viewing format of this document is in HTML because of the use of interactive plots. PDF version is also provided, albeit the plot won't work there.<!--TODO: final decision on this--> Links to HTML version of Jupyter notebooks used in the study are included in this report for further reference.
+The canonical viewing format of this document is in [HTML](https://ickc.github.io/UCB-PHYS229-2019Spring-final-project/report.html) because of the use of interactive plots. [PDF](https://ickc.github.io/UCB-PHYS229-2019Spring-final-project/report.pdf) version is also provided, albeit the plot won't work there.<!--TODO: final decision on this--> Links to HTML version of Jupyter notebooks used in the study are included in this report for further reference.
 
 ## Understanding CLASS
 
