@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Kolen Cheung" />
+  <title>UCB PHYS 229 Spring 2019 final project—21cmFAST and CLASS</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ickc/markdown-latex-css/css/common.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ickc/markdown-latex-css/fonts/fonts.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">UCB PHYS 229 Spring 2019 final project—21cmFAST and CLASS</h1>
+<p class="author">Kolen Cheung</p>
+<p class="date">May 10, 2019</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#introduction"><span class="toc-section-number">1</span> Introduction</a><ul>
+<li><a href="#understanding-class"><span class="toc-section-number">1.1</span> Understanding CLASS</a></li>
+<li><a href="#understanding-21cmfast"><span class="toc-section-number">1.2</span> Understanding 21cmFAST</a></li>
+<li><a href="#cmfast-to-class"><span class="toc-section-number">1.3</span> 21cmFAST to CLASS</a></li>
+</ul></li>
+<li><a href="#parameters"><span class="toc-section-number">2</span> Parameters</a></li>
+<li><a href="#logistics"><span class="toc-section-number">3</span> Logistics</a><ul>
+<li><a href="#workflow"><span class="toc-section-number">3.1</span> Workflow</a></li>
+</ul></li>
+<li><a href="#results"><span class="toc-section-number">4</span> results</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</nav>
+<h1 id="introduction"><span class="header-section-number">1</span> Introduction</h1>
+<p>21cmFAST is used to produce different ionization histories. CLASS is then used to produce their temperature and polarization angular power spectra and compare the results. The correctness of the result is however uncertain due to 21cmFAST being undocumented and strange behavior encountered from it, together with the fact that the glue to CLASS is less than perfect.</p>
+<p>The code used in this report, including the generation and hosting of this document, is available on <a href="https://github.com/ickc/UCB-PHYS229-2019Spring-final-project">GitHub here</a>. The data generated in this study is available on <a href="https://github.com/ickc/UCB-PHYS229-2019Spring-final-project/releases">GitHub Releases here</a>.</p>
+<p>The canonical viewing format of this document is in HTML because of the use of interactive plots. PDF version is also provided, albeit the plot won’t work there.<!--TODO: final decision on this--> Links to HTML version of Jupyter notebooks used in the study are included in this report for further reference.</p>
+<h2 id="understanding-class"><span class="header-section-number">1.1</span> Understanding CLASS</h2>
+<p>To ensure CLASS is setup correctly, <code>COM_PowerSpect_CMB-base-plikHM_TTTEEE-lowl-lowE-lensing-minimum-theory_R3.01.txt</code> available from <a href="http://pla.esac.esa.int/pla/#home">Planck Legacy Archive</a> <span class="citation" data-cites="2018arXiv180706209P">(Collaboration et al. 2018)</span> is compared. In order to reproduce this result, these files available from <a href="https://github.com/lesgourg/class_public">CLASS on GitHub</a> <span class="citation" data-cites="Blas:2011jb">(Blas et al. 2011)</span> are used:</p>
+<ul>
+<li><code>base_2018_plikHM_TTTEEE_lowl_lowE_lensing.ini</code></li>
+<li><code>cl_ref.pre</code></li>
+</ul>
+<p>together with setting <code>format = camb</code>.</p>
+<p>The Python interface <code>classy</code> is also used to compare <code>class</code> results. Without the <code>format = camb</code> option, they provides identical results. However, with <code>format = camb</code>, <code>classy</code>’s output is not changed, which may be due to a bug in the classy module when parsing the setting. Matching results from with and without <code>format = camb</code> setting, by manually rescaling <span class="math inline">\(C_l\)</span> to <span class="math inline">\(D_l\)</span> is not successful due to unknown reason.</p>
+<p>Therefore, in this study <code>class</code> is used directly with parameters modified from <code>base_2018_plikHM_TTTEEE_lowl_lowE_lensing.ini</code> with <code>format = camb</code>. <code>cl_ref.pre</code> is not used to sacrifice precision for manageable compute time.</p>
+<p>See more from these notebooks:</p>
+<ul>
+<li><p><a href="notebook/class_check.html"><code>class_check.ipynb</code></a>: used to understand CLASS and reproduce <code>COM_PowerSpect_CMB-base-plikHM_TTTEEE-lowl-lowE-lensing-minimum-theory_R3.01.txt</code></p></li>
+<li><p><a href="notebook/class_vs_classy.html"><code>class_vs_classy.ipynb</code></a>: comparing class and classy to make sure they provides identical results.</p></li>
+</ul>
+<h2 id="understanding-21cmfast"><span class="header-section-number">1.2</span> Understanding 21cmFAST</h2>
+<p>21cmFAST is hard to understand, due to the lack of documentations but comments lying within the code base. After running programs listed under <code>Programs/PROGRAM_LIST</code> from <a href="https://github.com/andreimesinger/21cmFAST">21cmFAST on GitHub</a> <span class="citation" data-cites="Park:2018go">(Park et al. 2018)</span>, where one program described there is not even available, <code>drive_logZscroll_Ts</code> should be the one to use. For our purpose, since we are interested in the ionization histories, <span class="math inline">\(x_e\)</span> should be extracted from a file named similar to <code>Output_files/Ts_outs/global_evolution_Nsteps40_zprimestepfactor1.020_L_X3.2e+40_alphaX1.0_f_star100.0500_alpha_star0.5000_f_esc100.0100_alpha_esc-0.5000_Mturn5.0e+08_t_star0.5000_Pop2_200_300Mpc</code>.</p>
+<p>The default <span class="math inline">\(z\)</span> range in the code is from <span class="math inline">\(6\)</span>–<span class="math inline">\(30\)</span>. <code>drive_logZscroll_Ts.c</code> could be modified to change this, but when the <span class="math inline">\(z\)</span>-range is changed to <span class="math inline">\(1\)</span>–<span class="math inline">\(30\)</span> instead, the output does not make sense. For example, <span class="math inline">\(x_e\)</span> would continue to rise as <span class="math inline">\(z\)</span> is decreasing below <span class="math inline">\(6\)</span>, but then drops again. Also, a bunch of other parameters eventually becomes <code>nan</code> as <span class="math inline">\(z\)</span> gets lower than <span class="math inline">\(6\)</span>. For these reasons the <span class="math inline">\(z\)</span> range is kept at there default <span class="math inline">\(6\)</span>–<span class="math inline">\(30\)</span>.</p>
+<p>Lastly, to match the cosmological parameters between those used in 21cmFAST and CLASS, 21cmFAST’s header files is modified in <a href="https://github.com/ickc/21cmFAST/commit/5b75463e4b76eadf1ed15be5779e9143a98462a2">a fork of 21cmFAST in this commit</a> to match those defined in <code>base_2018_plikHM_TTTEEE_lowl_lowE_lensing.ini</code>.</p>
+<p>See more from these notebooks:</p>
+<ul>
+<li><a href="notebook/21cmfast_understand_output.html"><code>21cmfast_understand_output.ipynb</code></a>: used to understand the output from 21cmFAST</li>
+</ul>
+<h2 id="cmfast-to-class"><span class="header-section-number">1.3</span> 21cmFAST to CLASS</h2>
+<p>In CLASS, <code>explanatory.ini</code> and <code>doc/manual/CLASS_MANUAL.pdf</code> documents everything. To inject <span class="math inline">\(x_e\)</span> from that obtained in 21cmFAST, <code>reio_parametrization</code> should be set to either <code>reio_bins_tanh</code> or <code>reio_inter</code>. <code>reio_bins_tanh</code> is to interpolate using <span class="math inline">\(\tanh\)</span>, while <code>reio_inter</code> linearly.</p>
+<p><code>reio_bins_tanh</code> should in principle be better, however with 76 <span class="math inline">\(x_e\)</span> values from 21cmFAST’s output, it needs too much memory than available, and after binning to only a few bins, the interpolated <span class="math inline">\(x_e\)</span> in CLASS is too step-wise to reproduce the input <span class="math inline">\(x_e\)</span>.</p>
+<p><code>reio_inter</code> is not without its problem. From <code>explanatory.ini</code>, a few <span class="math inline">\(z, x_e\)</span> values are needed to be specified at the boundary of this region. At the left boundary, e.g. if one set <span class="math inline">\(z = 6\)</span> to <span class="math inline">\(x_e = -1\)</span>, it would interpolate <span class="math inline">\(x_e\)</span> to 1 linearly between <span class="math inline">\(z\)</span> steps.</p>
+<p>It seems a better approach would be to interpolate linearly within <span class="math inline">\(z = 6\)</span>–<span class="math inline">\(30\)</span>, and interpolate with <span class="math inline">\(\tanh\)</span> on the left boundary. But the code provide no such option. In the end, <code>reio_inter</code> is used to interpolate linearly, and setting <span class="math inline">\(x_e = -2, -1, 0\)</span> at <span class="math inline">\(z = 0, 6, 30\)</span> according to the documentation, where the <span class="math inline">\(z = 6\)</span> location is chosen somewhat arbitrarily to coincide with the left boundary of the input such that it would be equivalent to ionized almost instantaneously at <span class="math inline">\(z = 6\)</span>.</p>
+<p>Although the resulting spectra from this input does not agree with <code>COM_PowerSpect_CMB-base-plikHM_TTTEEE-lowl-lowE-lensing-minimum-theory_R3.01.txt</code> mentioned in <a href="#understanding-class">Understanding CLASS</a>, the hope is that the differences between <span class="math inline">\(x_e\)</span> from <span class="math inline">\(z = 6\)</span>–<span class="math inline">\(30\)</span> can be represented in the differences in the final spectra output from CLASS, although we have no ways to verify that in this report.</p>
+<p>See more from these notebooks:</p>
+<ul>
+<li><p><a href="notebook/class_custom_x_e.html"><code>class_custom_x_e.ipynb</code></a>: preliminary check on the CLASS <span class="math inline">\(x_e\)</span> using output from 21cmFAST</p></li>
+<li><p><a href="notebook/classy_trials.html"><code>classy_trials.ipynb</code></a>: check <span class="math inline">\(x_e\)</span> from classy</p></li>
+</ul>
+<h1 id="parameters"><span class="header-section-number">2</span> Parameters</h1>
+<p>Parameters from 21cmFAST is left as default except for those cosmological parameters update mentioned above. CLASS’ parameters from <code>base_2018_plikHM_TTTEEE_lowl_lowE_lensing.ini</code> is used, with the injection of <span class="math inline">\(x_e\)</span> from 21cmFAST output. In addition, the first 7 parameters<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> from Table 1 <span class="citation" data-cites="Park:2018go">(Park et al. 2018, p. 5)</span> are varied, defined as these constants in <code>ANAL_PARAMS.H</code> and <code>HEAT_PARAMS.H</code>:</p>
+<ul>
+<li><code>STELLAR_BARYON_FRAC</code></li>
+<li><code>STELLAR_BARYON_PL</code></li>
+<li><code>ESC_FRAC</code></li>
+<li><code>ESC_PL</code></li>
+<li><code>M_TURNOVER</code></li>
+<li><code>t_STAR</code></li>
+<li><code>L_X</code></li>
+</ul>
+<p>All these parameters are varied once at each boundary of “Allowed range” defined in Table 1 <span class="citation" data-cites="Park:2018go">(Park et al. 2018, p. 5)</span> to get a sense of the possible differences in these ranges. Hence there’s 15 combinations—1 for default; 2 each per parameters, 1 for each boundary of the allowed range.</p>
+<h1 id="logistics"><span class="header-section-number">3</span> Logistics</h1>
+<p>In order to reproduce the result of this code, these repositories at respective tag/commit should be used:</p>
+<ul>
+<li><a href="https://github.com/andreimesinger/21cmFAST/tree/e81caff72b3152f4448e69d22f456cbb790eb964">21cmFAST at commit e81caff</a> <span class="citation" data-cites="Park:2018go">(Park et al. 2018)</span></li>
+<li><a href="https://github.com/lesgourg/class_public/tree/v2.7.2">CLASS at v2.7.2</a> <span class="citation" data-cites="Blas:2011jb">(Blas et al. 2011)</span> <!--TODO: add this repo --></li>
+</ul>
+<h2 id="workflow"><span class="header-section-number">3.1</span> Workflow</h2>
+<p>Note that the parameters in <code>21cmFAST</code> are compile time constants, therefore a script to generate header files is used and a recursive makefile is used to compile all the programs first. In addition, modified <code>NUMCORES</code> and <code>RAM</code> in <code>INIT_PARAMS.H</code> to match that of the machine used.</p>
+<ol>
+<li><p>within the <code>21cmFAST</code> directory, created a sub-directory <code>Parameter_spaces</code>, within which</p>
+<ul>
+<li><p><a href="notebook/21cmfast_param_gen.html"><code>notebook/21cmfast_param_gen.ipynb</code></a>: generates 21cmFAST parameters by writing header files per parameter set,</p></li>
+<li><p><code>bin/symlink.sh</code>: symlink the rest of code needed to be compiled,</p></li>
+<li><p><code>bin/makefile</code>: <code>make compile -j</code> to compile <code>drive_logZscroll_Ts</code> per parameter set.</p></li>
+</ul></li>
+<li><p><code>bin/makefile</code>: <code>make 21cmfast</code> to run all programs<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p></li>
+<li><p><a href="notebook/21cmfast_get_many_params.html"><code>21cmfast_get_many_params.ipynb</code></a>: parses 21cmFAST data and write <code>.ini</code> files for class</p></li>
+<li><p><code>bin/makefile</code>: <code>make class</code> to generate final spectra<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p></li>
+<li><p><a href="notebook/class_collect_param.html"><code>class_collect_param.ipynb</code></a>: collect spectra from CLASS</p></li>
+</ol>
+<h1 id="results"><span class="header-section-number">4</span> results</h1>
+<p><span class="math inline">\(x_e\)</span> as the parameters varies:</p>
+<figure>
+<embed src="media/x_e.html" style="width:100.0%" height="525" /><figcaption><span class="math inline">\(x_e\)</span></figcaption>
+</figure>
+<p>Below are the plots per spectrum, with slider across all parameters above. Except for the one labeled, the other parameters are left at the defaults.</p>
+<figure>
+<embed src="media/TT.html" style="width:100.0%" height="525" /><figcaption>TT</figcaption>
+</figure>
+<figure>
+<embed src="media/EE.html" style="width:100.0%" height="525" /><figcaption>EE</figcaption>
+</figure>
+<figure>
+<embed src="media/BB.html" style="width:100.0%" height="525" /><figcaption>BB</figcaption>
+</figure>
+<figure>
+<embed src="media/TE.html" style="width:100.0%" height="525" /><figcaption>TE</figcaption>
+</figure>
+<figure>
+<embed src="media/dd.html" style="width:100.0%" height="525" /><figcaption>dd</figcaption>
+</figure>
+<figure>
+<embed src="media/dT.html" style="width:100.0%" height="525" /><figcaption>dT</figcaption>
+</figure>
+<figure>
+<embed src="media/dE.html" style="width:100.0%" height="525" /><figcaption>dE</figcaption>
+</figure>
+<p>From the plots, these spectra, except perhaps dT, are not sensitive to these changes.</p>
+<p>It is inconclusive however if the spectra actually is not sensitive to the changes of the parameters, or if the included <span class="math inline">\(z\)</span>-range of <span class="math inline">\(6\)</span>–<span class="math inline">\(30\)</span> is not enough to capture the differences, due to the technical problems encountered mentioned above in <a href="#cmfast-to-class">21cmFAST to CLASS</a>.</p>
+<h1 id="references" class="unnumbered">References</h1>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-Blas:2011jb">
+<p>Blas D, Lesgourgues J, Tram T (2011) The Cosmic Linear Anisotropy Solving System (CLASS) II: Approximation schemes. arXivorg 034–034</p>
+</div>
+<div id="ref-2018arXiv180706209P">
+<p>Collaboration P, Aghanim N, Akrami Y et al (2018) Planck 2018 results. VI. Cosmological parameters. arXivorg arXiv:1807.06209</p>
+</div>
+<div id="ref-Park:2018go">
+<p>Park J, Mesinger A, Greig B, Gillet N (2018) Inferring the astrophysics of reionization and cosmic dawn from galaxy luminosity functions and the 21-cm signal. arXivorg 933–949</p>
+</div>
+</div>
+<section class="footnotes" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1" role="doc-endnote"><p>a corresponding constant defining the last parameter cannot be found in the header files so it is dropped from this study.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩</a></p></li>
+<li id="fn2" role="doc-endnote"><p>sequentially since it has ~20 GiB of scratch and ~12 GiB of RAM needed.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩</a></p></li>
+<li id="fn3" role="doc-endnote"><p>sequentially since class is multithreaded, also it uses a ton of RAM, north of 128 GiB.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩</a></p></li>
+</ol>
+</section>
+</body>
+</html>
