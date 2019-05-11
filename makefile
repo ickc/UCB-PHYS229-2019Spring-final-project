@@ -28,9 +28,10 @@ pandocArgHTML = $(pandocArgFragment) -s -N --mathjax -c $(CSSURL)/css/common.min
 
 ####################################################################################################################################
 
-html: $(MD2HTML) $(IPYNB2HTML)
+html: $(MD2HTML)
+htmlnotebook: $(IPYNB2HTML)
 pdf: $(MD2PDF)
-all: html pdf
+all: html pdf htmlnotebook
 docs: all
 
 clean:
