@@ -104,6 +104,8 @@ Note that the parameters in `21cmFAST` are compile time constants, therefore a s
 
 # results
 
+Note that in 2 set of parameters, 1 of them got non-sensical result from 21cmFAST, and another one request north of 192 GiB memory in class. Therefore the results below contains only 13 sets of parameters.
+
 $x_e$ as the parameters varies:
 
 ![$x_e$](media/x_e.html){width=100% height=525}
